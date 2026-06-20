@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control & Robotics — 12 Week Tracker</title>
+<style>
+  :root{
+    --bg:#fafaf8;
+    --card:#ffffff;
+    --border:#e4e2da;
+    --border-strong:#cfcdc3;
+    --text:#1f1f1d;
+    --text-secondary:#5f5e5a;
+    --text-tertiary:#8a8980;
+    --accent:#185fa5;
+    --accent-bg:#e6f1fb;
+    --accent-text:#0c447c;
+    --radius-md:8px;
+    --radius-lg:12px;
+    --week-colors: #534ab7,#0f6e56,#993c1d,#854f0b,#993556;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1a1a18;
+      --card:#242422;
+      --border:#3a3a36;
+      --border-strong:#4d4c47;
+      --text:#f1efe8;
+      --text-secondary:#b4b2a9;
+      --text-tertiary:#888780;
+      --accent:#85b7eb;
+      --accent-bg:#0c447c;
+      --accent-text:#e6f1fb;
+    }
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:2rem 1.25rem 4rem;}
+  header{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:1.5rem; flex-wrap:wrap;}
+  h1{font-size:21px; font-weight:600; margin:0 0 4px;}
+  .subtitle{font-size:13px; color:var(--text-secondary); margin:0;}
+  .actions{display:flex; gap:8px;}
+  button{
+    font-size:13px; padding:7px 12px; border-radius:var(--radius-md);
+    border:0.5px solid var(--border-strong); background:var(--card); color:var(--text);
+    cursor:pointer; display:flex; align-items:center; gap:5px;
+  }
+  button:hover{background:var(--bg);}
+  button:active{transform:scale(0.98);}
+
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:1.25rem;}
+  .stat{background:var(--card); border:0.5px solid var(--border); border-radius:var(--radius-md); padding:0.85rem 1rem;}
+  .stat-label{font-size:12px; color:var(--text-secondary); margin:0 0 4px;}
+  .stat-value{font-size:21px; font-weight:600; margin:0;}
+
+  .progress-track{height:7px; background:var(--border); border-radius:99px; overflow:hidden; margin-bottom:1.25rem;}
+  .progress-fill{height:100%; width:0%; background:var(--accent); transition:width .3s;}
+
+  .controls{display:flex; gap:8px; margin-bottom:1.25rem; flex-wrap:wrap;}
+  select, input[type=text]{
+    font-size:13px; padding:7px 10px; border-radius:var(--radius-md);
+    border:0.5px solid var(--border-strong); background:var(--card); color:var(--text);
+  }
+  select{flex:0 0 auto;}
+  input[type=text]{flex:1; min-width:160px;}
+
+  .week{border:0.5px solid var(--border); border-radius:var(--radius-lg); margin-bottom:10px; overflow:hidden;}
+  .week-header{padding:0.7rem 1rem; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:8px; color:#fff;}
+  .week-header .left{display:flex; align-items:center; gap:10px; min-width:0;}
+  .week-header .chevron{flex-shrink:0; transition:transform .2s; font-size:13px;}
+  .week-header .title{font-size:13.5px; font-weight:600; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .week-header .count{font-size:11.5px; flex-shrink:0; opacity:0.9;}
+  .week-body{padding:0.7rem 1rem 0.9rem; display:none;}
+  .week.open .week-body{display:block;}
+  .week.open .chevron{transform:rotate(0deg);}
+  .week:not(.open) .chevron{transform:rotate(-90deg);}
+
+  .project-row{display:flex; gap:10px; align-items:flex-start; padding:10px; background:var(--bg); border-radius:var(--radius-md); margin-bottom:10px; cursor:pointer;}
+  .project-row input{margin-top:2px; flex-shrink:0;}
+  .project-name{font-size:13px; font-weight:600; margin:0 0 2px;}
+  .project-meta{font-size:11.5px; color:var(--text-secondary); margin:0;}
+
+  .day-row{display:flex; gap:10px; align-items:flex-start; padding:7px 2px; cursor:pointer; border-top:0.5px solid var(--border);}
+  .day-row input{margin-top:3px; flex-shrink:0;}
+  .day-label{font-size:13px;}
+  .day-label.done{color:var(--text-tertiary); text-decoration:line-through;}
+
+  .next-step{background:var(--accent-bg); color:var(--accent-text); border-radius:var(--radius-md); padding:0.8rem 1rem; margin:1.5rem 0; font-size:13px;}
+  .next-step b{display:block; margin-bottom:4px; font-size:13.5px;}
+
+  footer{font-size:12px; color:var(--text-tertiary); text-align:center; margin-top:2rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Control & robotics — 12 week plan</h1>
+      <p class="subtitle">Electrical engineering → controls / autonomy track</p>
+    </div>
+    <div class="actions">
+      <button id="exportBtn"><span>↓</span>Export</button>
+      <button id="resetBtn"><span>↻</span>Reset</button>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><p class="stat-label">Days done</p><p class="stat-value" id="statDays">0 / 84</p></div>
+    <div class="stat"><p class="stat-label">Current streak</p><p class="stat-value" id="statStreak">0</p></div>
+    <div class="stat"><p class="stat-label">Projects shipped</p><p class="stat-value" id="statProjects">0 / 6</p></div>
+    <div class="stat"><p class="stat-label">Overall progress</p><p class="stat-value" id="statPct">0%</p></div>
+  </div>
+
+  <div class="progress-track"><div class="progress-fill" id="progressBar"></div></div>
+
+  <div class="controls">
+    <select id="weekJump"></select>
+    <input type="text" id="searchBox" placeholder="Search tasks...">
+  </div>
+
+  <div id="weeksContainer"></div>
+
+  <div class="next-step">
+    <b>What comes after week 12?</b>
+    Once you finish this plan you'll have the classical control + estimation + ROS2 foundation to actually benefit from heavier tools. Natural next layer: reinforcement learning fundamentals (policy gradients, PPO), then NVIDIA Isaac Lab / Isaac Sim for GPU-accelerated training on simulated robots — that's where locomotion and manipulation research happens today. It needs a real GPU and the prerequisites above, which is why it's deliberately not in weeks 1–12.
+  </div>
+
+  <footer>Progress is saved locally in this browser. Use Export to back up your progress as a text file.</footer>
+</div>
+
+<script>
+const PLAN = [
+{w:1, theme:"Foundations: Python + linear algebra refresh", color:"#534ab7",
+ project:{name:"Project: simulate a mass-spring-damper in Python and plot step response", cost:"€0 — just Python", deliverable:"A .py script + plot showing position vs time for different damping ratios"},
+ days:[
+ "Set up Python (numpy, scipy, matplotlib). Solve 5 basic linear algebra problems by hand, verify with numpy (matrix mult, inverse, det)",
+ "Eigenvalues/eigenvectors: do 5 problems by hand. Watch 3Blue1Brown 'Eigenvectors and eigenvalues' and connect it to what you computed",
+ "Review 1st and 2nd order ODEs. Solve a damped spring-mass ODE analytically by hand",
+ "Code: numerically integrate the same ODE in Python using scipy.integrate.odeint. Compare to your analytic solution",
+ "Plot step response for underdamped, critically damped, overdamped cases on one graph. Label rise time, overshoot, settling time",
+ "Read about state-space representation (x' = Ax + Bu). Convert your spring-mass ODE into state-space form by hand",
+ "Weekly project polish + write a short README explaining what damping ratio does physically. Push to GitHub"
+ ]},
+{w:2, theme:"Linear algebra for control + Python simulation skills", color:"#534ab7",
+ project:{name:"Project: build a generic linear state-space simulator class in Python", cost:"€0", deliverable:"A reusable Python class that simulates any A,B,C,D system given an input signal"},
+ days:[
+ "Matrix rank, null space, and why they matter for controllability. Do 3 hand examples",
+ "Controllability and observability matrices — compute them by hand for a 2-state system",
+ "Code: write a function that builds the controllability matrix from A,B and checks its rank",
+ "Eigenvalues and system stability: prove to yourself why Re(eigenvalue)<0 means stable, using your spring-mass system",
+ "Build a generic StateSpaceSystem Python class: takes A,B,C,D, simulates response to step/impulse input",
+ "Test your class on 3 different systems (spring-mass, RC circuit, a 3rd of your choice from EE coursework)",
+ "Project polish: clean code, docstrings, push to GitHub with example notebook"
+ ]},
+{w:3, theme:"Classical control: PID from first principles", color:"#0f6e56",
+ project:{name:"Project: PID controller tuned by hand for your spring-mass system, compare Ziegler-Nichols vs manual tuning", cost:"€0", deliverable:"Plot comparing 3 tuning approaches, written explanation of trade-offs"},
+ days:[
+ "Study transfer functions and Laplace transform basics — redo your ODE in the Laplace domain by hand",
+ "Understand P, I, D terms intuitively: what physical problem does each one solve? Write 3 sentences per term in your own words",
+ "Code a discrete PID controller from scratch in Python (no library) — just the algorithm, ~20 lines",
+ "Wire your PID into your state-space simulator, control the spring-mass system to a target position",
+ "Tune manually: change Kp, Ki, Kd one at a time, observe and log effects of each on overshoot/settling time",
+ "Implement Ziegler-Nichols tuning method, compare result to your manual tuning",
+ "Project polish: 3-panel plot (P only, PI, PID), README documenting what you observed"
+ ]},
+{w:4, theme:"Frequency domain: Bode, root locus, stability margins", color:"#0f6e56",
+ project:{name:"Project: analyze your PID-controlled system in frequency domain using Python control library", cost:"€0", deliverable:"Bode plot + root locus plot with gain/phase margins labeled, written interpretation"},
+ days:[
+ "Install python-control library. Learn to define a transfer function and plot step response with it (sanity check vs your manual sim)",
+ "Study Bode plots: what do magnitude and phase curves tell you? Sketch one by hand for a simple 1st order system",
+ "Generate Bode plot for your spring-mass + PID system using python-control. Identify gain margin and phase margin",
+ "Study root locus: how pole locations relate to stability and oscillation. Sketch root locus by hand for a 2nd order system",
+ "Generate root locus plot for your system in Python. Find the gain at which it becomes unstable",
+ "Deliberately detune your PID until margins get small, observe in simulation that response gets oscillatory — connect theory to behavior",
+ "Project polish: combine all plots, write a short report explaining margins in plain language"
+ ]},
+{w:5, theme:"State-space control: pole placement and LQR", color:"#993c1d",
+ project:{name:"Project: design an LQR controller for an inverted pendulum (simulated)", cost:"€0", deliverable:"Working simulation of a balanced inverted pendulum with LQR gains, plus comparison to a naive PID attempt"},
+ days:[
+ "Derive the linearized inverted pendulum equations of motion by hand (or carefully follow a derivation and reproduce every step yourself)",
+ "Code the inverted pendulum as a state-space system (linearized around upright). Verify it's unstable in open loop",
+ "Study pole placement: use scipy/control's place() function to choose closed-loop pole locations, test on pendulum",
+ "Study LQR: what do Q and R matrices mean intuitively? Try 3 different Q,R combinations and observe behavior differences",
+ "Implement LQR using control.lqr(), balance the pendulum from a small initial angle",
+ "Push the system harder: larger initial angle, add disturbance force mid-simulation, see where linear control breaks down",
+ "Project polish: animate the pendulum if possible (matplotlib animation), write up Q/R tuning intuition you gained"
+ ]},
+{w:6, theme:"Estimation: Kalman Filter fundamentals", color:"#993c1d",
+ project:{name:"Project: Kalman filter that estimates true position from noisy sensor data on your spring-mass system", cost:"€0", deliverable:"Plot showing noisy measurement vs true state vs Kalman estimate, with covariance shrinking over time"},
+ days:[
+ "Probability refresher: Gaussian distributions, mean/variance, how combining 2 Gaussian estimates works. Do it by hand for a simple example",
+ "Study Kalman filter conceptually: predict step vs update step. Write the 5 core equations by hand and label what each does",
+ "Add Gaussian noise to your spring-mass simulator's position output (simulate a noisy sensor)",
+ "Implement Kalman filter predict step only — verify it matches your noiseless model when there's no measurement update",
+ "Implement the update step — fuse noisy measurement with prediction. Plot estimate vs noisy measurement vs ground truth",
+ "Experiment: vary process noise Q and measurement noise R, observe how the filter trusts model vs sensor differently",
+ "Project polish: clean plots with legend, write 1-paragraph intuitive explanation of what Kalman filter is doing"
+ ]},
+{w:7, theme:"Robot kinematics: forward & inverse kinematics, Jacobians", color:"#854f0b",
+ project:{name:"Project: 2-link planar robot arm — compute forward/inverse kinematics and visualize reachable workspace", cost:"€0", deliverable:"Python visualization of a 2-link arm reaching target points via inverse kinematics"},
+ days:[
+ "Study homogeneous transforms and rotation matrices. Do 3 hand problems: rotate a point, compose 2 rotations",
+ "Derive forward kinematics for a 2-link planar arm by hand using trig (joint angles → end-effector x,y)",
+ "Code forward kinematics function, plot the arm at various joint angles using matplotlib",
+ "Derive inverse kinematics for the 2-link arm by hand (geometric approach) — find joint angles given target x,y",
+ "Code inverse kinematics, verify it agrees with forward kinematics (round-trip test)",
+ "Study Jacobians: why do we need them, what's the relationship between joint velocity and end-effector velocity. Compute the Jacobian by hand for your arm",
+ "Project polish: animate the arm reaching a sequence of target points, push to GitHub"
+ ]},
+{w:8, theme:"Path planning algorithms", color:"#854f0b",
+ project:{name:"Project: implement A* and RRT for a 2D grid with obstacles, compare paths found", cost:"€0", deliverable:"Visualization comparing A* path vs RRT path on the same obstacle map"},
+ days:[
+ "Study graph search fundamentals: BFS, DFS, Dijkstra. Trace Dijkstra by hand on a small 5-node graph",
+ "Study A*: how the heuristic changes Dijkstra's behavior. Implement A* on a 2D occupancy grid with simple obstacles",
+ "Test A* on 3 different obstacle layouts (open, maze-like, narrow corridor), observe path quality and runtime",
+ "Study RRT (Rapidly-exploring Random Trees): why it's used for high-dimensional/continuous spaces. Implement basic RRT",
+ "Run RRT on the same obstacle maps as A*, compare path smoothness and computation time",
+ "Add path smoothing (simple shortcutting) to your RRT output, compare before/after",
+ "Project polish: side-by-side visualization, write a short comparison of when you'd use each algorithm"
+ ]},
+{w:9, theme:"ROS2 fundamentals — the industry-standard middleware", color:"#993556",
+ project:{name:"Project: ROS2 package with a publisher/subscriber node pair simulating a simple sensor-to-controller pipeline", cost:"€0 — runs on your own Linux/WSL/Docker", deliverable:"Working ROS2 package on GitHub with launch file, demonstrated with rqt_graph screenshot"},
+ days:[
+ "Install ROS2 (use Docker if your OS makes native install painful). Run the basic talker/listener demo, understand what just happened",
+ "Study ROS2 core concepts: nodes, topics, messages, services. Draw the architecture of the talker/listener demo from memory",
+ "Create your own ROS2 package, write a minimal publisher node that publishes a fake sensor value",
+ "Write a subscriber node that receives the value and computes something simple (e.g. a moving average)",
+ "Connect this to your Week 3 PID controller: subscriber receives 'position', publishes 'control_output' using your PID code",
+ "Add a launch file that starts both nodes together. Visualize the graph with rqt_graph",
+ "Project polish: README with setup instructions and architecture diagram, push full package to GitHub"
+ ]},
+{w:10, theme:"Bringing it together: simulated robot control loop", color:"#993556",
+ project:{name:"Project: full closed loop in ROS2 — simulated robot, EKF-style state estimate, PID/LQR control, all as separate nodes", cost:"€0", deliverable:"End-to-end ROS2 simulation: plant node + estimator node + controller node communicating over topics"},
+ days:[
+ "Design the system on paper first: which node does what, what topics connect them. Sketch the architecture",
+ "Build a 'plant' node that simulates your spring-mass or pendulum system and publishes noisy sensor readings",
+ "Build an 'estimator' node using your Week 6 Kalman filter code, subscribing to noisy data and publishing clean estimate",
+ "Build a 'controller' node using your PID or LQR code, subscribing to the estimate and publishing control commands",
+ "Wire it all together with a launch file, debug the full loop until the simulated system stabilizes correctly",
+ "Stress test: inject larger noise or a disturbance mid-run, see if your system recovers as theory predicts",
+ "Project polish: record a short screen capture of rqt_plot showing convergence, write architecture README"
+ ]},
+{w:11, theme:"Going physical (low-cost) OR deepening simulation, your choice", color:"#185fa5",
+ project:{name:"Project: choose your track — (A) cheap hardware: balance/line-follow robot on Arduino/ESP32+Python bridge, or (B) simulation: same control loop in Gazebo/PyBullet with a simulated differential-drive robot", cost:"Track A: ~€20-40 for ESP32 + sensors if you don't have them. Track B: €0", deliverable:"Either a physical robot demo video, or a Gazebo/PyBullet simulation video"},
+ days:[
+ "Decide track A (hardware) or B (simulation). If A: order parts now (ESP32, MPU6050 or 2 wheel motors+driver). If B: install PyBullet or Gazebo",
+ "Track A: get basic sensor reading over serial into Python. Track B: load a simple differential-drive robot URDF and drive it manually",
+ "Track A: implement basic motor control function. Track B: implement a simple 'go to waypoint' controller using your kinematics from Week 7",
+ "Track A: get your PID controller running on real sensor data to balance or follow a line. Track B: connect your Week 8 path planner to drive the simulated robot through obstacles",
+ "Debug day — real hardware/sim always breaks differently than pure simulation did. Budget the whole day for this, log what's different and why",
+ "Iterate based on what you found. Get a clean successful run",
+ "Project polish: record video proof, write up what changed between theory/pure-sim and reality/full-sim"
+ ]},
+{w:12, theme:"Portfolio, polish, and job readiness", color:"#185fa5",
+ project:{name:"Project: portfolio site/README hub tying all 6 projects together + 1 capstone demo video", cost:"€0", deliverable:"A GitHub profile README or simple portfolio page linking all projects, plus a 2-3 min video walking through your favorite project"},
+ days:[
+ "Audit all 6 weekly projects: which has the best 'wow factor' for a recruiter? Polish that one further (better plots, cleaner code)",
+ "Write a clear top-level README for each project repo: problem, approach, results, what you'd do with more time",
+ "Build a simple portfolio index (GitHub profile README or a one-page site) linking all projects with 1-line descriptions each",
+ "Record a 2-3 minute video walking through your capstone project (Week 10 or 11) — screen recording is fine, narrate your thinking",
+ "Write a short 'what I learned' reflection covering the math, the control theory, and the engineering judgment calls you made",
+ "Identify your 3 weakest areas from the last 12 weeks, write a focused 1-page plan for what you'll study next (e.g. MPC, nonlinear control, Isaac Lab / RL, SLAM)",
+ "Final review: read through your whole GitHub from a stranger's perspective. Fix anything confusing. Done — you now have proof, not just claims"
+ ]}
+];
+
+const STORAGE_KEY = 'robotics_tracker_progress_v1';
+function loadState(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e){ return {}; }
+}
+function saveState(s){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch(e){}
+}
+
+let state = loadState();
+let openWeekNum = 1;
+
+function dayKey(w,d){ return 'w'+w+'d'+d; }
+function projKey(w){ return 'proj'+w; }
+function totalDays(){ return PLAN.reduce((a,w)=>a+w.days.length,0); }
+
+function computeStats(s){
+  let done=0, projDone=0;
+  PLAN.forEach(w=>{
+    w.days.forEach((_,i)=>{ if(s[dayKey(w.w,i)]) done++; });
+    if(s[projKey(w.w)]) projDone++;
+  });
+  let streak=0;
+  outer:
+  for(let w=PLAN.length-1; w>=0; w--){
+    const week = PLAN[w];
+    for(let d=week.days.length-1; d>=0; d--){
+      if(s[dayKey(week.w,d)]) streak++;
+      else break outer;
+    }
+  }
+  return {done, total: totalDays(), projDone, projTotal: PLAN.length, streak};
+}
+
+function renderStats(){
+  const st = computeStats(state);
+  document.getElementById('statDays').textContent = st.done + ' / ' + st.total;
+  document.getElementById('statStreak').textContent = st.streak;
+  document.getElementById('statProjects').textContent = st.projDone + ' / ' + st.projTotal;
+  const pct = Math.round((st.done/st.total)*100);
+  document.getElementById('statPct').textContent = pct + '%';
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+function renderWeeks(filter){
+  const container = document.getElementById('weeksContainer');
+  container.innerHTML = '';
+  PLAN.forEach(week=>{
+    const doneCount = week.days.filter((_,i)=>state[dayKey(week.w,i)]).length;
+
+    const card = document.createElement('div');
+    card.className = 'week' + (week.w === openWeekNum ? ' open' : '');
+    card.id = 'week-' + week.w;
+
+    const header = document.createElement('div');
+    header.className = 'week-header';
+    header.style.background = week.color;
+    header.innerHTML = '<div class="left"><span class="chevron">▾</span><p class="title">Week ' + week.w + ' — ' + week.theme + '</p></div>'
+      + '<span class="count">' + doneCount + '/' + week.days.length + '</span>';
+    header.addEventListener('click', ()=>{
+      openWeekNum = (openWeekNum === week.w) ? null : week.w;
+      renderWeeks(document.getElementById('searchBox').value);
+    });
+    card.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'week-body';
+
+    const projRow = document.createElement('label');
+    projRow.className = 'project-row';
+    const projCheck = document.createElement('input');
+    projCheck.type = 'checkbox';
+    projCheck.checked = !!state[projKey(week.w)];
+    projCheck.addEventListener('change', ()=>{
+      state[projKey(week.w)] = projCheck.checked;
+      saveState(state);
+      renderStats();
+    });
+    const projText = document.createElement('div');
+    projText.innerHTML = '<p class="project-name">' + week.project.name + '</p>'
+      + '<p class="project-meta">Budget: ' + week.project.cost + ' · Deliverable: ' + week.project.deliverable + '</p>';
+    projRow.appendChild(projCheck);
+    projRow.appendChild(projText);
+    body.appendChild(projRow);
+
+    week.days.forEach((taskText, i)=>{
+      if(filter && !taskText.toLowerCase().includes(filter.toLowerCase())) return;
+      const row = document.createElement('label');
+      row.className = 'day-row';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !!state[dayKey(week.w,i)];
+      const label = document.createElement('span');
+      label.className = 'day-label' + (cb.checked ? ' done' : '');
+      label.textContent = 'Day ' + (i+1) + ': ' + taskText;
+      cb.addEventListener('change', ()=>{
+        state[dayKey(week.w,i)] = cb.checked;
+        saveState(state);
+        label.classList.toggle('done', cb.checked);
+        renderStats();
+        const dCount = week.days.filter((_,j)=>state[dayKey(week.w,j)]).length;
+        header.querySelector('.count').textContent = dCount + '/' + week.days.length;
+      });
+      row.appendChild(cb);
+      row.appendChild(label);
+      body.appendChild(row);
+    });
+
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+}
+
+function populateWeekJump(){
+  const sel = document.getElementById('weekJump');
+  sel.innerHTML = '<option value="">Jump to week...</option>' + PLAN.map(w=>'<option value="'+w.w+'">Week '+w.w+' — '+w.theme+'</option>').join('');
+  sel.addEventListener('change', ()=>{
+    if(sel.value){
+      openWeekNum = parseInt(sel.value);
+      renderWeeks(document.getElementById('searchBox').value);
+      const el = document.getElementById('week-'+sel.value);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  });
+}
+
+document.getElementById('searchBox').addEventListener('input', (e)=>{
+  renderWeeks(e.target.value);
+  if(e.target.value){
+    document.querySelectorAll('.week').forEach(w=>w.classList.add('open'));
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(!confirm('Reset all progress? This cannot be undone.')) return;
+  state = {};
+  saveState(state);
+  renderStats();
+  renderWeeks('');
+});
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const st = computeStats(state);
+  let text = 'Robotics control 12-week progress\n';
+  text += 'Days completed: ' + st.done + '/' + st.total + '\n';
+  text += 'Projects shipped: ' + st.projDone + '/' + st.projTotal + '\n\n';
+  PLAN.forEach(week=>{
+    text += 'Week ' + week.w + ' - ' + week.theme + '\n';
+    week.days.forEach((d,i)=>{
+      text += '  [' + (state[dayKey(week.w,i)]?'x':' ') + '] Day ' + (i+1) + ': ' + d + '\n';
+    });
+    text += '  Project [' + (state[projKey(week.w)]?'x':' ') + ']: ' + week.project.name + '\n\n';
+  });
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'robotics-progress.txt';
+  a.click();
+});
+
+populateWeekJump();
+renderStats();
+renderWeeks('');
+</script>
+</body>
+</html>
