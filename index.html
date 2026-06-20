@@ -100,6 +100,31 @@
   .next-step b{display:block; margin-bottom:4px; font-size:13.5px;}
 
   footer{font-size:12px; color:var(--text-tertiary); text-align:center; margin-top:2rem;}
+
+  .section-divider{margin:2.5rem 0 1.5rem; padding-top:1.5rem; border-top:0.5px solid var(--border-strong);}
+  .section-title{font-size:18px; font-weight:600; margin:0 0 4px;}
+  .section-subtitle{font-size:13px; color:var(--text-secondary); margin:0 0 1.25rem;}
+
+  .course-card{background:var(--card); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:0.85rem 1rem; margin-bottom:10px;}
+  .course-card.core{border:2px solid var(--accent);}
+  .course-row{display:flex; gap:10px; align-items:flex-start;}
+  .course-row input{margin-top:3px; flex-shrink:0; cursor:pointer;}
+  .course-info{flex:1; min-width:0;}
+  .course-badge{display:inline-block; font-size:11px; font-weight:500; padding:2px 8px; border-radius:5px; background:var(--accent-bg); color:var(--accent-text); margin-bottom:5px;}
+  .course-name{font-size:14px; font-weight:500; margin:0 0 2px; cursor:pointer;}
+  .course-name.done{color:var(--text-tertiary); text-decoration:line-through;}
+  .course-meta{font-size:12px; color:var(--text-secondary); margin:0;}
+  .course-code{font-family:ui-monospace,monospace; font-size:11.5px; color:var(--text-tertiary);}
+
+  .elective-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:10px;}
+  .elective-card{background:var(--card); border:0.5px solid var(--border); border-radius:var(--radius-md); padding:0.7rem 0.9rem;}
+  .elective-row{display:flex; gap:8px; align-items:flex-start;}
+  .elective-row input{margin-top:2px; flex-shrink:0; cursor:pointer;}
+  .elective-name{font-size:13px; font-weight:500; margin:0 0 2px; cursor:pointer;}
+  .elective-name.considering{color:var(--accent);}
+  .elective-meta{font-size:11.5px; color:var(--text-secondary); margin:0;}
+
+  .track-tag{font-size:10.5px; padding:1px 7px; border-radius:4px; background:var(--bg); color:var(--text-secondary); border:0.5px solid var(--border-strong); display:inline-block; margin-top:3px;}
 </style>
 </head>
 <body>
@@ -141,10 +166,149 @@
     Once you finish this plan you'll have the classical control + estimation + ROS2 foundation to actually benefit from heavier tools. Natural next layer: reinforcement learning fundamentals (policy gradients, PPO), then NVIDIA Isaac Lab / Isaac Sim for GPU-accelerated training on simulated robots — that's where locomotion and manipulation research happens today. It needs a real GPU and the prerequisites above, which is why it's deliberately not in weeks 1–12.
   </div>
 
+  <div class="section-divider">
+    <p class="section-title">תואר ראשון — קורסי שנה ג', הנדסת חשמל TAU</p>
+    <p class="section-subtitle">לפי ידיעון 0512-11-01-0000. דרישה: 12 קורסי מסלול, מתוכם 4 קורסי ליבה מ-4 מסלולים שונים, + 2 מעבדות מתקדמות בשני מסלולים שונים. תאמת מול הידיעון העדכני לפני רישום בפועל.</p>
+
+    <p class="course-meta" style="margin-bottom:10px; font-weight:500; color:var(--text);">4 קורסי הליבה (חובה — מ-4 מסלולים שונים)</p>
+    <div id="coreCoursesContainer"></div>
+
+    <p class="course-meta" style="margin:1.25rem 0 10px; font-weight:500; color:var(--text);">קורסים נוספים לשיקול — לא מחייב, סמן "שוקל" כדי לעקוב</p>
+    <div class="elective-grid" id="electivesContainer"></div>
+  </div>
+
   <footer>Progress is saved locally in this browser. Use Export to back up your progress as a text file.</footer>
 </div>
 
 <script>
+const CORE_COURSES = [
+  {code:"0512-4360", name:"מבוא לבקרה לינארית מודרנית", track:"בקרה ומערכות אוטונומיות", note:"קורס ליבה במסלול. דרישת קדם: מבוא לתורת הבקרה (0512-3543). זה ה-LQR/state-space שעשינו בתוכנית."},
+  {code:"0512-4200", name:"מבוא לעיבוד ספרתי של אותות", track:"עיבוד אותות", note:"קורס ליבה במסלול. דרישת קדם: אותות ומערכות (0512-2835). בסיס הכרחי לעבודה עם חיישנים אמיתיים."},
+  {code:"0512-4400", name:"מבנה המחשב", track:"מערכות מחשב", note:"קורס ליבה במסלול. דרישות קדם: מערכות לוגיות ספרתיות + מבני נתונים ואלגוריתמים. בסיס ל-embedded systems."},
+  {code:"0512-3571", name:"המרת אנרגיה", track:"אנרגיה ומקורות מתחדשים", note:"קורס ליבה במסלול. דרישת קדם: מעגלים ומערכות ליניאריות (0512-2832). רקע בהינע חשמלי — רלוונטי ישירות למנועי רובוטים."}
+];
+
+const ELECTIVE_COURSES = [
+  {code:"0512-4300", name:"מבוא לבקרה ספרתית", track:"בקרה ומערכות אוטונומיות", note:"בקרה רציפה → מימוש על מיקרו-בקר."},
+  {code:"0512-4362", name:"מערכות משוב שימושיות", track:"בקרה ומערכות אוטונומיות", note:"דוגמאות תעשייתיות אמיתיות לבקרה."},
+  {code:"0542-4621", name:"מבוא לרובוטיקה", track:"הנדסה מכנית", note:"שייך לפקולטת מכנית — בדוק קדמים (מבוא לבקרה + דינמיקה של גוף קשיח ממכנית)."},
+  {code:"0512-4264", name:"מבוא ללמידת מכונה סטטיסטית", track:"עיבוד אותות", note:"בסיס ל-RL ול-perception עתידיים."},
+  {code:"0512-4261", name:"מבוא לעיבוד אותות סטטיסטי", track:"עיבוד אותות", note:"קרוב מאוד ל-Kalman filter ברמה אקדמית — משלים שבוע 6 בתוכנית."},
+  {code:"0512-4262", name:"עיבוד תמונות", track:"עיבוד אותות", note:"בסיס לכל רובוט עם מצלמה."},
+  {code:"0510-6401", name:"תכנון וניתוח אלגוריתמים", track:"מערכות מחשב", note:"קורס תואר שני, דורש אישור מרצה. A*, גרפים, ניתוח סיבוכיות."},
+  {code:"0512-4402", name:"מבוא לתכנות מערכות", track:"מערכות מחשב", note:"C, ניהול זיכרון, זמן אמת — קריטי לתכנות מיקרו-בקרים."},
+  {code:"0512-4860", name:"מבוא לאנטנות ומעגלי RF", track:"אלקטרומגנטיות וקרינה", note:"תחליף אפשרי אם נמשך לתקשורת/טלמטריה במקום חישה ויזואלית."},
+  {code:"0512-4503", name:"ממירים ממותגים בתדר גבוה", track:"אנרגיה ומקורות מתחדשים", note:"המשך טבעי ל'המרת אנרגיה' — power electronics לעומק."},
+  {code:"0512-4703", name:"מבוא לתכנון מעגלי VLSI", track:"התקנים אלקטרוניים", note:"רק אם רוצה לתכנן שבבים/FPGA ייעודיים, לא רק לתכנת מיקרו-בקר."},
+  {code:"0510-7255", name:"למידה עמוקה", track:"עיבוד אותות", note:"קורס תואר שני, דורש אישור מרצה. שווה רק אם ML/RL רובוטי הוא כיוון עיקרי."},
+  {code:"0510-7438", name:"אלגוריתמים בגרפים דינאמיים", track:"מערכות מחשב", note:"קורס תואר שני, למצטיינים באישור מרצה. עומק תיאורטי בפלאנינג."},
+  {code:"0512-4602", name:"מבוא לתקשורת אופטית", track:"אופטיקה ופוטוניקה", note:"בסיס לכיוון LIDAR/חישה אופטית מתקדמת."}
+];
+
+const COURSE_STORAGE_KEY = 'tau_y3_courses_v1';
+function loadCourseState(){
+  try { return JSON.parse(localStorage.getItem(COURSE_STORAGE_KEY)) || {}; } catch(e){ return {}; }
+}
+function saveCourseState(s){
+  try { localStorage.setItem(COURSE_STORAGE_KEY, JSON.stringify(s)); } catch(e){}
+}
+let courseState = loadCourseState();
+
+function renderCoreCourses(){
+  const container = document.getElementById('coreCoursesContainer');
+  container.innerHTML = '';
+  CORE_COURSES.forEach((c, i)=>{
+    const key = 'core' + i;
+    const card = document.createElement('div');
+    card.className = 'course-card core';
+    const row = document.createElement('div');
+    row.className = 'course-row';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.id = 'course-' + key;
+    cb.checked = !!courseState[key];
+    const info = document.createElement('div');
+    info.className = 'course-info';
+    const nameLabel = document.createElement('label');
+    nameLabel.htmlFor = cb.id;
+    nameLabel.className = 'course-name' + (cb.checked ? ' done' : '');
+    nameLabel.textContent = c.name + ' ';
+    const codeSpan = document.createElement('span');
+    codeSpan.className = 'course-code';
+    codeSpan.textContent = '(' + c.code + ')';
+    nameLabel.appendChild(codeSpan);
+    const badge = document.createElement('span');
+    badge.className = 'course-badge';
+    badge.textContent = c.track;
+    const metaP = document.createElement('p');
+    metaP.className = 'course-meta';
+    metaP.style.marginTop = '4px';
+    metaP.textContent = c.note;
+    info.appendChild(badge);
+    info.appendChild(nameLabel);
+    info.appendChild(metaP);
+    cb.addEventListener('change', ()=>{
+      courseState[key] = cb.checked;
+      saveCourseState(courseState);
+      nameLabel.classList.toggle('done', cb.checked);
+    });
+    row.appendChild(cb);
+    row.appendChild(info);
+    card.appendChild(row);
+    container.appendChild(card);
+  });
+}
+
+function renderElectives(){
+  const container = document.getElementById('electivesContainer');
+  container.innerHTML = '';
+  ELECTIVE_COURSES.forEach((c, i)=>{
+    const key = 'elective' + i;
+    const card = document.createElement('div');
+    card.className = 'elective-card';
+    const row = document.createElement('div');
+    row.className = 'elective-row';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.id = 'course-' + key;
+    cb.checked = !!courseState[key];
+    const info = document.createElement('div');
+    const nameLabel = document.createElement('label');
+    nameLabel.htmlFor = cb.id;
+    nameLabel.className = 'elective-name' + (cb.checked ? ' considering' : '');
+    nameLabel.textContent = c.name;
+    const codeDiv = document.createElement('div');
+    codeDiv.className = 'course-code';
+    codeDiv.textContent = c.code;
+    const metaP = document.createElement('p');
+    metaP.className = 'elective-meta';
+    metaP.style.marginTop = '3px';
+    metaP.textContent = c.note;
+    const trackTag = document.createElement('span');
+    trackTag.className = 'track-tag';
+    trackTag.textContent = c.track;
+    info.appendChild(nameLabel);
+    info.appendChild(codeDiv);
+    info.appendChild(metaP);
+    info.appendChild(trackTag);
+    cb.addEventListener('change', ()=>{
+      courseState[key] = cb.checked;
+      saveCourseState(courseState);
+      nameLabel.classList.toggle('considering', cb.checked);
+    });
+    row.appendChild(cb);
+    row.appendChild(info);
+    card.appendChild(row);
+    container.appendChild(card);
+  });
+}
+
+renderCoreCourses();
+renderElectives();
+</script>
+
+<script>
+
 const PLAN = [
 {w:1, theme:"Foundations: Python + linear algebra refresh", color:"#534ab7",
  project:{name:"Project: simulate a mass-spring-damper in Python and plot step response", cost:"€0 — just Python", deliverable:"A .py script + plot showing position vs time for different damping ratios"},
