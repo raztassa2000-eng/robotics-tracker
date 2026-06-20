@@ -87,10 +87,14 @@
   .project-name{font-size:13px; font-weight:600; margin:0 0 2px;}
   .project-meta{font-size:11.5px; color:var(--text-secondary); margin:0;}
 
-  .day-row{display:flex; gap:10px; align-items:flex-start; padding:7px 2px; cursor:pointer; border-top:0.5px solid var(--border);}
-  .day-row input{margin-top:3px; flex-shrink:0;}
-  .day-label{font-size:13px;}
+  .day-row{display:flex; gap:10px; align-items:flex-start; padding:9px 2px; border-top:0.5px solid var(--border);}
+  .day-row input{margin-top:3px; flex-shrink:0; cursor:pointer;}
+  .day-content{flex:1; min-width:0;}
+  .day-label{font-size:13px; cursor:pointer; display:block;}
   .day-label.done{color:var(--text-tertiary); text-decoration:line-through;}
+  .day-resource{display:inline-flex; align-items:center; gap:5px; font-size:12px; margin-top:4px; padding:3px 8px; background:var(--accent-bg); color:var(--accent-text); border-radius:6px; text-decoration:none;}
+  .day-resource:hover{opacity:0.85;}
+  .day-resource .src{opacity:0.75; font-weight:400;}
 
   .next-step{background:var(--accent-bg); color:var(--accent-text); border-radius:var(--radius-md); padding:0.8rem 1rem; margin:1.5rem 0; font-size:13px;}
   .next-step b{display:block; margin-bottom:4px; font-size:13.5px;}
@@ -120,6 +124,11 @@
 
   <div class="progress-track"><div class="progress-fill" id="progressBar"></div></div>
 
+  <div class="next-step" style="margin:0 0 1.25rem;">
+    <b>Core sources used throughout</b>
+    MIT OCW 18.06 (linear algebra, Gilbert Strang) · Brian Douglas "Control System Lectures" (YouTube) · Steve Brunton "Control Bootcamp" (YouTube) · python-control library docs · ROS2 official docs/tutorials. All free. Every day below links the exact lecture/page/pset for that day — click the source pill.
+  </div>
+
   <div class="controls">
     <select id="weekJump"></select>
     <input type="text" id="searchBox" placeholder="Search tasks...">
@@ -140,134 +149,134 @@ const PLAN = [
 {w:1, theme:"Foundations: Python + linear algebra refresh", color:"#534ab7",
  project:{name:"Project: simulate a mass-spring-damper in Python and plot step response", cost:"€0 — just Python", deliverable:"A .py script + plot showing position vs time for different damping ratios"},
  days:[
- "Set up Python (numpy, scipy, matplotlib). Solve 5 basic linear algebra problems by hand, verify with numpy (matrix mult, inverse, det)",
- "Eigenvalues/eigenvectors: do 5 problems by hand. Watch 3Blue1Brown 'Eigenvectors and eigenvalues' and connect it to what you computed",
- "Review 1st and 2nd order ODEs. Solve a damped spring-mass ODE analytically by hand",
- "Code: numerically integrate the same ODE in Python using scipy.integrate.odeint. Compare to your analytic solution",
- "Plot step response for underdamped, critically damped, overdamped cases on one graph. Label rise time, overshoot, settling time",
- "Read about state-space representation (x' = Ax + Bu). Convert your spring-mass ODE into state-space form by hand",
- "Weekly project polish + write a short README explaining what damping ratio does physically. Push to GitHub"
+ {t:"Set up Python (numpy, scipy, matplotlib). Then do MIT 18.06 Problem Set 1, questions on matrix multiplication and inverses — solve by hand first, then verify each with numpy.", r:{name:"18.06 Problem Set 1 + solutions", src:"MIT OCW", url:"https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/resources/problem-sets-with-solutions/"}},
+ {t:"Eigenvalues/eigenvectors: watch the visual intro, then do 5 by-hand eigenvalue problems from 18.06 Pset 6 (eigenvalues chapter) before checking with numpy.linalg.eig.", r:{name:"Eigenvectors and eigenvalues", src:"3Blue1Brown", url:"https://www.youtube.com/watch?v=PFDu9oVAE-g"}},
+ {t:"Review 1st/2nd order ODEs using MIT's Differential Equations course notes on 2nd order linear ODEs with constant coefficients. Solve a damped spring-mass ODE analytically by hand.", r:{name:"18.03 Differential Equations — 2nd order ODE notes", src:"MIT OCW", url:"https://ocw.mit.edu/courses/18-03sc-differential-equations-fall-2011/resources/second-order-constant-coefficient-linear-equations/"}},
+ {t:"Code: numerically integrate your ODE using scipy's solve_ivp (modern replacement for odeint). Follow the official tutorial example, then swap in your own equation.", r:{name:"scipy.integrate.solve_ivp docs + example", src:"SciPy docs", url:"https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html"}},
+ {t:"Plot step response for underdamped, critically damped, overdamped cases on one graph. Use this reference to define rise time/overshoot/settling time correctly before labeling your plot.", r:{name:"Time-domain specs: rise time, overshoot, settling time", src:"Brian Douglas, Control System Lectures", url:"https://www.youtube.com/watch?v=mEPyKtgxoyo"}},
+ {t:"Read about state-space representation (x' = Ax + Bu) — watch the intro lecture, then convert your spring-mass ODE into state-space form by hand.", r:{name:"State Space, Part 1 — what is state-space", src:"Brian Douglas, Control System Lectures", url:"https://www.youtube.com/watch?v=hpeKrMG-WP0"}},
+ {t:"Weekly project polish: clean up your script, add a docstring, write a short README explaining what damping ratio does physically. Push to GitHub (follow GitHub's own quickstart if this is your first repo).", r:{name:"GitHub quickstart — create a repo", src:"GitHub Docs", url:"https://docs.github.com/en/get-started/quickstart/create-a-repo"}}
  ]},
 {w:2, theme:"Linear algebra for control + Python simulation skills", color:"#534ab7",
  project:{name:"Project: build a generic linear state-space simulator class in Python", cost:"€0", deliverable:"A reusable Python class that simulates any A,B,C,D system given an input signal"},
  days:[
- "Matrix rank, null space, and why they matter for controllability. Do 3 hand examples",
- "Controllability and observability matrices — compute them by hand for a 2-state system",
- "Code: write a function that builds the controllability matrix from A,B and checks its rank",
- "Eigenvalues and system stability: prove to yourself why Re(eigenvalue)<0 means stable, using your spring-mass system",
- "Build a generic StateSpaceSystem Python class: takes A,B,C,D, simulates response to step/impulse input",
- "Test your class on 3 different systems (spring-mass, RC circuit, a 3rd of your choice from EE coursework)",
- "Project polish: clean code, docstrings, push to GitHub with example notebook"
+ {t:"Matrix rank and null space: read the chapter, then do 3 by-hand examples computing rank and finding null space of a 3x3 matrix.", r:{name:"18.06 — Rank and the row reduced form", src:"MIT OCW lecture notes", url:"https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/resources/the-rank-of-a-matrix/"}},
+ {t:"Controllability and observability matrices: watch the lecture, then by hand compute the controllability matrix for a simple 2-state system and check its rank.", r:{name:"Controllability [Control Bootcamp]", src:"Steve Brunton", url:"https://www.youtube.com/watch?v=BroDc1L-Y2k"}},
+ {t:"Code: write a Python function that builds the controllability matrix from A,B using numpy and checks np.linalg.matrix_rank on it.", r:{name:"numpy.linalg.matrix_rank docs", src:"NumPy docs", url:"https://numpy.org/doc/stable/reference/generated/numpy.linalg.matrix_rank.html"}},
+ {t:"Watch the lecture on stability and eigenvalues, then prove to yourself why Re(eigenvalue) < 0 means stable using your own spring-mass A matrix.", r:{name:"Stability and Eigenvalues [Control Bootcamp]", src:"Steve Brunton", url:"https://www.youtube.com/watch?v=h7nJ6ZL4Lf0"}},
+ {t:"Build a generic StateSpaceSystem Python class: takes A,B,C,D, simulates response to step/impulse input using scipy.signal.StateSpace as a reference implementation to check yours against.", r:{name:"scipy.signal.StateSpace docs", src:"SciPy docs", url:"https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.StateSpace.html"}},
+ {t:"Test your class on 3 different systems: spring-mass, a simple RC circuit (look up its state-space form), and one system of your choice from your EE coursework.", r:{name:"RC circuit state-space derivation example", src:"MIT 6.302 notes", url:"https://ocw.mit.edu/courses/6-302-feedback-systems-spring-2007/"}},
+ {t:"Project polish: clean code, docstrings, push to GitHub with an example notebook showing your class against scipy's StateSpace for verification.", r:{name:"Jupyter / VS Code notebooks setup", src:"VS Code docs", url:"https://code.visualstudio.com/docs/datascience/jupyter-notebooks"}}
  ]},
 {w:3, theme:"Classical control: PID from first principles", color:"#0f6e56",
  project:{name:"Project: PID controller tuned by hand for your spring-mass system, compare Ziegler-Nichols vs manual tuning", cost:"€0", deliverable:"Plot comparing 3 tuning approaches, written explanation of trade-offs"},
  days:[
- "Study transfer functions and Laplace transform basics — redo your ODE in the Laplace domain by hand",
- "Understand P, I, D terms intuitively: what physical problem does each one solve? Write 3 sentences per term in your own words",
- "Code a discrete PID controller from scratch in Python (no library) — just the algorithm, ~20 lines",
- "Wire your PID into your state-space simulator, control the spring-mass system to a target position",
- "Tune manually: change Kp, Ki, Kd one at a time, observe and log effects of each on overshoot/settling time",
- "Implement Ziegler-Nichols tuning method, compare result to your manual tuning",
- "Project polish: 3-panel plot (P only, PI, PID), README documenting what you observed"
+ {t:"Study Laplace transforms and transfer functions from the start of this series, then redo your spring-mass ODE in the Laplace domain by hand.", r:{name:"Introduction to the Transfer Function", src:"Brian Douglas, Control System Lectures", url:"https://www.youtube.com/watch?v=AhPP2T1xWmA"}},
+ {t:"Watch the dedicated lecture on PID, then write 3 sentences in your own words on what physical problem each of P, I, D solves.", r:{name:"PID Control — A Brief Introduction", src:"Brian Douglas, Control System Lectures", url:"https://www.youtube.com/watch?v=UR0hOmjaHp0"}},
+ {t:"Code a discrete PID controller from scratch in Python (no library) — about 20 lines, following this minimal worked example for the discrete-time update equations.", r:{name:"Simple Examples of PID Control", src:"Brian Douglas, Control System Lectures", url:"https://www.youtube.com/watch?v=XfAt6hNV8XM"}},
+ {t:"Wire your PID into your Week 2 state-space simulator. Control the spring-mass system toward a target position, plot the result.", r:{name:"python-control tutorial — closed-loop simulation patterns", src:"python-control docs", url:"https://python-control.readthedocs.io/en/latest/examples/python-control_tutorial.html"}},
+ {t:"Tune manually: change Kp, Ki, Kd one at a time, log effects of each on overshoot/settling time in a small table.", r:{name:"control.step_info — auto-computes rise/settle/overshoot for you to check your readings", src:"python-control docs", url:"https://python-control.readthedocs.io/en/latest/generated/control.step_info.html"}},
+ {t:"Implement Ziegler-Nichols tuning method by hand using the classic table, compare the result to your manual tuning.", r:{name:"Ziegler-Nichols tuning method explained", src:"Brian Douglas, Control System Lectures", url:"https://www.youtube.com/watch?v=fusr9eTceEo"}},
+ {t:"Project polish: 3-panel plot (P only, PI, PID) side by side, README documenting what you observed about each term's effect.", r:{name:"Matplotlib subplots reference", src:"Matplotlib docs", url:"https://matplotlib.org/stable/gallery/subplots_axes_and_figures/subplots_demo.html"}}
  ]},
 {w:4, theme:"Frequency domain: Bode, root locus, stability margins", color:"#0f6e56",
  project:{name:"Project: analyze your PID-controlled system in frequency domain using Python control library", cost:"€0", deliverable:"Bode plot + root locus plot with gain/phase margins labeled, written interpretation"},
  days:[
- "Install python-control library. Learn to define a transfer function and plot step response with it (sanity check vs your manual sim)",
- "Study Bode plots: what do magnitude and phase curves tell you? Sketch one by hand for a simple 1st order system",
- "Generate Bode plot for your spring-mass + PID system using python-control. Identify gain margin and phase margin",
- "Study root locus: how pole locations relate to stability and oscillation. Sketch root locus by hand for a 2nd order system",
- "Generate root locus plot for your system in Python. Find the gain at which it becomes unstable",
- "Deliberately detune your PID until margins get small, observe in simulation that response gets oscillatory — connect theory to behavior",
- "Project polish: combine all plots, write a short report explaining margins in plain language"
+ {t:"Install python-control (pip install control). Follow the official tutorial to define a transfer function and plot its step response — sanity check against your manual Week 1-3 simulations.", r:{name:"pip install control + first transfer function", src:"python-control docs", url:"https://python-control.readthedocs.io/en/latest/examples/python-control_tutorial.html"}},
+ {t:"Watch the Bode plots introduction, then sketch by hand the magnitude and phase curve for a simple 1st order system (one real pole).", r:{name:"Bode Plots, Introduction", src:"Brian Douglas, Control System Lectures", url:"https://www.youtube.com/watch?v=_eh1conN6YM"}},
+ {t:"Generate the Bode plot for your spring-mass + PID system using control.bode_plot(). Identify gain margin and phase margin from the plot.", r:{name:"control.bode_plot docs", src:"python-control docs", url:"https://python-control.readthedocs.io/en/latest/generated/control.bode_plot.html"}},
+ {t:"Watch the root locus introduction, then sketch root locus by hand for a 2nd order system using the angle/magnitude rules taught.", r:{name:"The Root Locus Method — Introduction", src:"Brian Douglas, Control System Lectures", url:"https://www.youtube.com/watch?v=DolN5wq7Jx4"}},
+ {t:"Generate the root locus plot for your system using control.root_locus(). Find the gain at which it crosses into instability.", r:{name:"control.root_locus docs", src:"python-control docs", url:"https://python-control.readthedocs.io/en/latest/generated/control.root_locus_plot.html"}},
+ {t:"Deliberately detune your PID until margins shrink, observe in simulation that the response gets oscillatory — connect the Bode-plot theory to what you see in the time-domain plot.", r:{name:"Gain and Phase Margin explained", src:"Brian Douglas, Control System Lectures", url:"https://www.youtube.com/watch?v=N9Y2Faq4Tnc"}},
+ {t:"Project polish: combine all plots into one report, write a short explanation of margins in plain language a non-controls engineer could follow.", r:{name:"GitHub Markdown guide (for a clean README)", src:"GitHub Docs", url:"https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax"}}
  ]},
 {w:5, theme:"State-space control: pole placement and LQR", color:"#993c1d",
  project:{name:"Project: design an LQR controller for an inverted pendulum (simulated)", cost:"€0", deliverable:"Working simulation of a balanced inverted pendulum with LQR gains, plus comparison to a naive PID attempt"},
  days:[
- "Derive the linearized inverted pendulum equations of motion by hand (or carefully follow a derivation and reproduce every step yourself)",
- "Code the inverted pendulum as a state-space system (linearized around upright). Verify it's unstable in open loop",
- "Study pole placement: use scipy/control's place() function to choose closed-loop pole locations, test on pendulum",
- "Study LQR: what do Q and R matrices mean intuitively? Try 3 different Q,R combinations and observe behavior differences",
- "Implement LQR using control.lqr(), balance the pendulum from a small initial angle",
- "Push the system harder: larger initial angle, add disturbance force mid-simulation, see where linear control breaks down",
- "Project polish: animate the pendulum if possible (matplotlib animation), write up Q/R tuning intuition you gained"
+ {t:"Watch the lecture deriving the inverted-pendulum-on-a-cart equations of motion. Reproduce every step of the derivation yourself on paper, don't just read it.", r:{name:"Inverted Pendulum on a Cart [Control Bootcamp]", src:"Steve Brunton", url:"https://www.youtube.com/watch?v=Pi7l8mMjYVE"}},
+ {t:"Code the pendulum as a state-space system (linearized around upright) using the reference MATLAB code translated to Python — verify it's unstable in open loop.", r:{name:"cartpend.m reference implementation (translate to Python)", src:"GitHub — Brunton Control Bootcamp code", url:"https://github.com/bertozzijr/Control_Bootcamp_S_Brunton"}},
+ {t:"Watch the eigenvalue placement lecture, then use scipy.signal.place_poles to choose closed-loop pole locations for your pendulum.", r:{name:"Eigenvalue Placement for the Inverted Pendulum on a Cart", src:"Steve Brunton, Control Bootcamp", url:"https://www.youtube.com/watch?v=v_eYBefJTAk"}},
+ {t:"Watch the LQR lecture for this exact system. Try 3 different Q,R combinations and observe how the controller behavior changes.", r:{name:"Linear Quadratic Regulator (LQR) Control for the Inverted Pendulum", src:"Steve Brunton, Control Bootcamp", url:"https://www.youtube.com/watch?v=1_UobILf3cc"}},
+ {t:"Implement LQR using control.lqr() (or scipy's solve_continuous_are if you want to build it from the Riccati equation yourself). Balance the pendulum from a small initial angle.", r:{name:"control.lqr docs", src:"python-control docs", url:"https://python-control.readthedocs.io/en/latest/generated/control.lqr.html"}},
+ {t:"Push the system harder: larger initial angle, add a disturbance force mid-simulation, observe where the linearized LQR controller starts to fail.", r:{name:"lqr_cartpend.m — reference for disturbance testing pattern", src:"GitHub — Brunton Control Bootcamp code", url:"https://github.com/bertozzijr/Control_Bootcamp_S_Brunton"}},
+ {t:"Project polish: animate the pendulum using matplotlib.animation if possible, write up the Q/R tuning intuition you gained.", r:{name:"Matplotlib animation tutorial", src:"Matplotlib docs", url:"https://matplotlib.org/stable/users/explain/animations/animations.html"}}
  ]},
 {w:6, theme:"Estimation: Kalman Filter fundamentals", color:"#993c1d",
  project:{name:"Project: Kalman filter that estimates true position from noisy sensor data on your spring-mass system", cost:"€0", deliverable:"Plot showing noisy measurement vs true state vs Kalman estimate, with covariance shrinking over time"},
  days:[
- "Probability refresher: Gaussian distributions, mean/variance, how combining 2 Gaussian estimates works. Do it by hand for a simple example",
- "Study Kalman filter conceptually: predict step vs update step. Write the 5 core equations by hand and label what each does",
- "Add Gaussian noise to your spring-mass simulator's position output (simulate a noisy sensor)",
- "Implement Kalman filter predict step only — verify it matches your noiseless model when there's no measurement update",
- "Implement the update step — fuse noisy measurement with prediction. Plot estimate vs noisy measurement vs ground truth",
- "Experiment: vary process noise Q and measurement noise R, observe how the filter trusts model vs sensor differently",
- "Project polish: clean plots with legend, write 1-paragraph intuitive explanation of what Kalman filter is doing"
+ {t:"Probability refresher: read the section on combining two Gaussian estimates (this is literally the core idea behind the Kalman filter), then do it by hand for a simple numeric example.", r:{name:"Khan Academy — combining normal distributions", src:"Khan Academy", url:"https://www.khanacademy.org/math/statistics-probability/random-variables-stats-library/combining-random-variables/v/sum-of-normally-distributed-random-variables"}},
+ {t:"Watch the motivation and observability lectures, then write the 5 core Kalman filter equations by hand and label what each one does.", r:{name:"Motivation for Full-State Estimation", src:"Steve Brunton, Control Bootcamp", url:"https://www.youtube.com/watch?v=RfTcezpRMY8"}},
+ {t:"Add Gaussian noise to your spring-mass simulator's position output using numpy.random.normal, to simulate a noisy sensor reading.", r:{name:"numpy.random.normal docs", src:"NumPy docs", url:"https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html"}},
+ {t:"Watch the core Kalman Filter lecture, then implement the predict step only — verify it matches your noiseless model when there's no measurement update yet.", r:{name:"The Kalman Filter [Control Bootcamp]", src:"Steve Brunton, Control Bootcamp", url:"https://www.youtube.com/watch?v=s_9InuQAx-g"}},
+ {t:"Implement the update step — fuse the noisy measurement with the prediction. Plot estimate vs noisy measurement vs ground truth on one graph.", r:{name:"Kalman Filter Example in Matlab (translate logic to Python)", src:"Steve Brunton, Control Bootcamp", url:"https://www.youtube.com/watch?v=Lgq4R-F8SX8"}},
+ {t:"Experiment: vary process noise Q and measurement noise R, observe how the filter shifts trust between model and sensor.", r:{name:"FilterPy Kalman filter docs (cross-check your implementation)", src:"FilterPy docs", url:"https://filterpy.readthedocs.io/en/latest/kalman/KalmanFilter.html"}},
+ {t:"Project polish: clean plots with a legend, write a 1-paragraph intuitive explanation of what the Kalman filter is doing, in your own words.", r:{name:"Data-Driven Science and Engineering, Ch. 8 (free PDF) — for terminology check", src:"Brunton & Kutz, databookuw.com", url:"http://databookuw.com/databook.pdf"}}
  ]},
 {w:7, theme:"Robot kinematics: forward & inverse kinematics, Jacobians", color:"#854f0b",
  project:{name:"Project: 2-link planar robot arm — compute forward/inverse kinematics and visualize reachable workspace", cost:"€0", deliverable:"Python visualization of a 2-link arm reaching target points via inverse kinematics"},
  days:[
- "Study homogeneous transforms and rotation matrices. Do 3 hand problems: rotate a point, compose 2 rotations",
- "Derive forward kinematics for a 2-link planar arm by hand using trig (joint angles → end-effector x,y)",
- "Code forward kinematics function, plot the arm at various joint angles using matplotlib",
- "Derive inverse kinematics for the 2-link arm by hand (geometric approach) — find joint angles given target x,y",
- "Code inverse kinematics, verify it agrees with forward kinematics (round-trip test)",
- "Study Jacobians: why do we need them, what's the relationship between joint velocity and end-effector velocity. Compute the Jacobian by hand for your arm",
- "Project polish: animate the arm reaching a sequence of target points, push to GitHub"
+ {t:"Study homogeneous transforms and rotation matrices from this open robotics textbook chapter. Do 3 hand problems: rotate a point, compose 2 rotations.", r:{name:"Modern Robotics, Ch. 3 — Rigid-Body Motions (free textbook)", src:"Lynch & Park, modernrobotics.org", url:"https://hades.mech.northwestern.edu/images/7/7f/MR.pdf"}},
+ {t:"Derive forward kinematics for a 2-link planar arm by hand using trigonometry (joint angles → end-effector x,y), then code the function.", r:{name:"2-link planar arm forward kinematics derivation", src:"Cornell course notes (free PDF)", url:"https://www.cs.cornell.edu/courses/cs4620/2017fa/lectures/24kinematics.pdf"}},
+ {t:"Plot the arm at various joint angles using matplotlib to verify your forward kinematics function visually looks correct.", r:{name:"Matplotlib line plot basics", src:"Matplotlib docs", url:"https://matplotlib.org/stable/tutorials/pyplot.html"}},
+ {t:"Derive inverse kinematics for the 2-link arm by hand (geometric / law-of-cosines approach), following the same Modern Robotics chapter's IK section.", r:{name:"Modern Robotics, Ch. 6 — Inverse Kinematics (free textbook)", src:"Lynch & Park, modernrobotics.org", url:"https://hades.mech.northwestern.edu/images/7/7f/MR.pdf"}},
+ {t:"Code inverse kinematics, verify it agrees with forward kinematics by doing a round-trip test (FK of your IK output should match the original target).", r:{name:"numpy.arctan2 docs (needed for correct quadrant in IK)", src:"NumPy docs", url:"https://numpy.org/doc/stable/reference/generated/numpy.arctan2.html"}},
+ {t:"Study Jacobians: why we need them, the relationship between joint velocity and end-effector velocity. Compute the Jacobian by hand for your 2-link arm.", r:{name:"Modern Robotics, Ch. 5 — Velocity Kinematics and the Jacobian", src:"Lynch & Park, modernrobotics.org", url:"https://hades.mech.northwestern.edu/images/7/7f/MR.pdf"}},
+ {t:"Project polish: animate the arm reaching a sequence of target points, push to GitHub with a clear README and a GIF if possible.", r:{name:"Converting matplotlib animation to GIF", src:"Matplotlib docs", url:"https://matplotlib.org/stable/api/_as_gen/matplotlib.animation.PillowWriter.html"}}
  ]},
 {w:8, theme:"Path planning algorithms", color:"#854f0b",
  project:{name:"Project: implement A* and RRT for a 2D grid with obstacles, compare paths found", cost:"€0", deliverable:"Visualization comparing A* path vs RRT path on the same obstacle map"},
  days:[
- "Study graph search fundamentals: BFS, DFS, Dijkstra. Trace Dijkstra by hand on a small 5-node graph",
- "Study A*: how the heuristic changes Dijkstra's behavior. Implement A* on a 2D occupancy grid with simple obstacles",
- "Test A* on 3 different obstacle layouts (open, maze-like, narrow corridor), observe path quality and runtime",
- "Study RRT (Rapidly-exploring Random Trees): why it's used for high-dimensional/continuous spaces. Implement basic RRT",
- "Run RRT on the same obstacle maps as A*, compare path smoothness and computation time",
- "Add path smoothing (simple shortcutting) to your RRT output, compare before/after",
- "Project polish: side-by-side visualization, write a short comparison of when you'd use each algorithm"
+ {t:"Study graph search fundamentals: BFS, DFS, Dijkstra, using this clear visual explainer. Trace Dijkstra by hand on a small 5-node graph you draw yourself.", r:{name:"Dijkstra's algorithm visual explanation", src:"Red Blob Games", url:"https://www.redblobgames.com/pathfinding/a-star/introduction.html"}},
+ {t:"Continue the same guide into the A* section: how the heuristic changes Dijkstra's behavior. Implement A* on a 2D occupancy grid with simple obstacles.", r:{name:"Introduction to A*", src:"Red Blob Games", url:"https://www.redblobgames.com/pathfinding/a-star/introduction.html"}},
+ {t:"Test your A* implementation on 3 different obstacle layouts (open, maze-like, narrow corridor). Observe path quality and runtime differences.", r:{name:"Implementation notes for A* (heaps, grids)", src:"Red Blob Games", url:"https://www.redblobgames.com/pathfinding/a-star/implementation.html"}},
+ {t:"Study RRT (Rapidly-exploring Random Trees): why it's used for high-dimensional/continuous spaces. Implement a basic RRT in Python following this tutorial's pseudocode.", r:{name:"RRT algorithm explained with pseudocode", src:"PythonRobotics docs", url:"https://atsushisakai.github.io/PythonRobotics/modules/path_planning/rrt/rrt.html"}},
+ {t:"Run RRT on the same obstacle maps you used for A*. Compare path smoothness and computation time between the two algorithms.", r:{name:"PythonRobotics — reference RRT implementation to check yours against", src:"PythonRobotics GitHub", url:"https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning/RRT"}},
+ {t:"Add basic path smoothing (shortcutting: try connecting non-adjacent waypoints directly if the line is obstacle-free) to your RRT output, compare before/after.", r:{name:"Path smoothing for RRT explained", src:"PythonRobotics docs", url:"https://atsushisakai.github.io/PythonRobotics/modules/path_planning/rrt/rrt.html#path-planning-with-smoothing"}},
+ {t:"Project polish: side-by-side visualization of A* vs RRT paths, write a short comparison of when you'd use each algorithm in practice.", r:{name:"A* vs sampling-based planners — comparison discussion", src:"PythonRobotics docs overview", url:"https://atsushisakai.github.io/PythonRobotics/modules/path_planning/path_planning.html"}}
  ]},
 {w:9, theme:"ROS2 fundamentals — the industry-standard middleware", color:"#993556",
  project:{name:"Project: ROS2 package with a publisher/subscriber node pair simulating a simple sensor-to-controller pipeline", cost:"€0 — runs on your own Linux/WSL/Docker", deliverable:"Working ROS2 package on GitHub with launch file, demonstrated with rqt_graph screenshot"},
  days:[
- "Install ROS2 (use Docker if your OS makes native install painful). Run the basic talker/listener demo, understand what just happened",
- "Study ROS2 core concepts: nodes, topics, messages, services. Draw the architecture of the talker/listener demo from memory",
- "Create your own ROS2 package, write a minimal publisher node that publishes a fake sensor value",
- "Write a subscriber node that receives the value and computes something simple (e.g. a moving average)",
- "Connect this to your Week 3 PID controller: subscriber receives 'position', publishes 'control_output' using your PID code",
- "Add a launch file that starts both nodes together. Visualize the graph with rqt_graph",
- "Project polish: README with setup instructions and architecture diagram, push full package to GitHub"
+ {t:"Install ROS2 (use the official Docker image if your OS makes native install painful). Run the basic talker/listener demo from the official tutorial and understand what just happened.", r:{name:"ROS2 official installation guide", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Installation.html"}},
+ {t:"Follow the official 'Understanding nodes/topics' tutorials. Draw the architecture of the talker/listener demo from memory afterward.", r:{name:"ROS2 Beginner: CLI Tools tutorials (nodes, topics)", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools.html"}},
+ {t:"Follow the official tutorial to create your own ROS2 package, write a minimal publisher node that publishes a fake sensor value.", r:{name:"Writing a simple publisher and subscriber (Python)", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html"}},
+ {t:"Write the subscriber node that receives the value and computes something simple, like a moving average, following the same tutorial's subscriber half.", r:{name:"Writing a simple publisher and subscriber (Python)", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html"}},
+ {t:"Connect this to your Week 3 PID controller: subscriber receives 'position', publishes 'control_output' using your own PID code inside the callback.", r:{name:"ROS2 custom message / topic design basics", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Custom-ROS2-Interfaces.html"}},
+ {t:"Add a launch file that starts both nodes together, following the official launch tutorial. Visualize the running graph with rqt_graph.", r:{name:"Creating a launch file", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Launch/Creating-Launch-Files.html"}},
+ {t:"Project polish: README with setup instructions and an architecture diagram (even a hand-drawn one photographed works), push the full package to GitHub.", r:{name:"ROS2 package.xml / README conventions", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Creating-Your-First-ROS2-Package.html"}}
  ]},
 {w:10, theme:"Bringing it together: simulated robot control loop", color:"#993556",
  project:{name:"Project: full closed loop in ROS2 — simulated robot, EKF-style state estimate, PID/LQR control, all as separate nodes", cost:"€0", deliverable:"End-to-end ROS2 simulation: plant node + estimator node + controller node communicating over topics"},
  days:[
- "Design the system on paper first: which node does what, what topics connect them. Sketch the architecture",
- "Build a 'plant' node that simulates your spring-mass or pendulum system and publishes noisy sensor readings",
- "Build an 'estimator' node using your Week 6 Kalman filter code, subscribing to noisy data and publishing clean estimate",
- "Build a 'controller' node using your PID or LQR code, subscribing to the estimate and publishing control commands",
- "Wire it all together with a launch file, debug the full loop until the simulated system stabilizes correctly",
- "Stress test: inject larger noise or a disturbance mid-run, see if your system recovers as theory predicts",
- "Project polish: record a short screen capture of rqt_plot showing convergence, write architecture README"
+ {t:"Design the system on paper first: which node does what, what topics connect them. Sketch the architecture before writing any code.", r:{name:"ROS2 concepts overview (nodes, topics, services)", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Concepts/Basic/About-Nodes.html"}},
+ {t:"Build a 'plant' node that simulates your spring-mass or pendulum system (reuse Week 1-5 code) and publishes noisy sensor readings on a topic.", r:{name:"ROS2 timers for periodic publishing", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html"}},
+ {t:"Build an 'estimator' node using your Week 6 Kalman filter code, subscribing to the noisy data topic and publishing a clean state estimate.", r:{name:"ROS2 multiple topics / pub-sub patterns", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries.html"}},
+ {t:"Build a 'controller' node using your PID or LQR code, subscribing to the estimate topic and publishing control commands.", r:{name:"ROS2 QoS settings (important once you have 3 nodes talking)", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Concepts/Intermediate/About-Quality-of-Service-Settings.html"}},
+ {t:"Wire it all together with a launch file. Debug the full loop until the simulated system stabilizes correctly end-to-end.", r:{name:"ROS2 launch file with multiple nodes", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Launch/Creating-Launch-Files.html"}},
+ {t:"Stress test: inject larger noise or a mid-run disturbance, see if your system recovers the way the theory predicts it should.", r:{name:"rqt_plot for live signal visualization", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Tutorials/Demos/Using-Rqt-Console.html"}},
+ {t:"Project polish: record a short screen capture of rqt_plot showing convergence, write up the architecture in a README.", r:{name:"rqt_graph for architecture screenshots", src:"docs.ros.org", url:"https://docs.ros.org/en/jazzy/Tutorials/Demos/Rqt-Graph.html"}}
  ]},
 {w:11, theme:"Going physical (low-cost) OR deepening simulation, your choice", color:"#185fa5",
  project:{name:"Project: choose your track — (A) cheap hardware: balance/line-follow robot on Arduino/ESP32+Python bridge, or (B) simulation: same control loop in Gazebo/PyBullet with a simulated differential-drive robot", cost:"Track A: ~€20-40 for ESP32 + sensors if you don't have them. Track B: €0", deliverable:"Either a physical robot demo video, or a Gazebo/PyBullet simulation video"},
  days:[
- "Decide track A (hardware) or B (simulation). If A: order parts now (ESP32, MPU6050 or 2 wheel motors+driver). If B: install PyBullet or Gazebo",
- "Track A: get basic sensor reading over serial into Python. Track B: load a simple differential-drive robot URDF and drive it manually",
- "Track A: implement basic motor control function. Track B: implement a simple 'go to waypoint' controller using your kinematics from Week 7",
- "Track A: get your PID controller running on real sensor data to balance or follow a line. Track B: connect your Week 8 path planner to drive the simulated robot through obstacles",
- "Debug day — real hardware/sim always breaks differently than pure simulation did. Budget the whole day for this, log what's different and why",
- "Iterate based on what you found. Get a clean successful run",
- "Project polish: record video proof, write up what changed between theory/pure-sim and reality/full-sim"
+ {t:"Decide track A (hardware) or B (simulation). Track A: order an ESP32 + MPU6050 (or 2 wheel motors+driver). Track B: install PyBullet (pip install pybullet, much lighter than Gazebo to set up).", r:{name:"PyBullet quickstart guide", src:"PyBullet docs", url:"https://pybullet.org/wordpress/index.php/quickstart-guide/"}},
+ {t:"Track A: get a basic sensor reading over serial into Python using pyserial. Track B: load a simple differential-drive robot URDF and drive it manually with keyboard input.", r:{name:"pyserial docs (Track A) / PyBullet differential-drive examples (Track B)", src:"pyserial docs / PyBullet GitHub", url:"https://pyserial.readthedocs.io/en/latest/shortintro.html"}},
+ {t:"Track A: implement a basic motor control function (PWM via the ESP32). Track B: implement a 'go to waypoint' controller using your Week 7 kinematics.", r:{name:"ESP32 PWM motor control basics", src:"Random Nerd Tutorials", url:"https://randomnerdtutorials.com/esp32-pwm-arduino-ide/"}},
+ {t:"Track A: get your Week 3 PID controller running on real sensor data to balance or follow a line. Track B: connect your Week 8 path planner to drive the simulated robot through obstacles.", r:{name:"PyBullet robot navigation example collection", src:"PyBullet GitHub examples", url:"https://github.com/bulletphysics/bullet3/tree/master/examples/pybullet/examples"}},
+ {t:"Debug day — real hardware/sim always breaks differently than pure simulation did. Budget the whole day for this, log what's different and why.", r:{name:"Common ESP32 serial debugging issues (Track A reference)", src:"Random Nerd Tutorials", url:"https://randomnerdtutorials.com/esp32-troubleshooting-guide/"}},
+ {t:"Iterate based on what you found yesterday. Get one clean, successful, repeatable run.", r:{name:"PythonRobotics — full worked robot control examples for inspiration", src:"PythonRobotics GitHub", url:"https://github.com/AtsushiSakai/PythonRobotics"}},
+ {t:"Project polish: record video proof, write up what changed between theory/pure-sim and reality/full-sim — this comparison is genuinely valuable to articulate in interviews.", r:{name:"Screen recording on Linux (OBS Studio, free)", src:"OBS Project", url:"https://obsproject.com/"}}
  ]},
 {w:12, theme:"Portfolio, polish, and job readiness", color:"#185fa5",
  project:{name:"Project: portfolio site/README hub tying all 6 projects together + 1 capstone demo video", cost:"€0", deliverable:"A GitHub profile README or simple portfolio page linking all projects, plus a 2-3 min video walking through your favorite project"},
  days:[
- "Audit all 6 weekly projects: which has the best 'wow factor' for a recruiter? Polish that one further (better plots, cleaner code)",
- "Write a clear top-level README for each project repo: problem, approach, results, what you'd do with more time",
- "Build a simple portfolio index (GitHub profile README or a one-page site) linking all projects with 1-line descriptions each",
- "Record a 2-3 minute video walking through your capstone project (Week 10 or 11) — screen recording is fine, narrate your thinking",
- "Write a short 'what I learned' reflection covering the math, the control theory, and the engineering judgment calls you made",
- "Identify your 3 weakest areas from the last 12 weeks, write a focused 1-page plan for what you'll study next (e.g. MPC, nonlinear control, Isaac Lab / RL, SLAM)",
- "Final review: read through your whole GitHub from a stranger's perspective. Fix anything confusing. Done — you now have proof, not just claims"
+ {t:"Audit all 6 weekly projects: which has the best 'wow factor' for a recruiter? Polish that one further (better plots, cleaner code).", r:{name:"Awesome README examples for inspiration", src:"GitHub", url:"https://github.com/matiassingers/awesome-readme"}},
+ {t:"Write a clear top-level README for each project repo: problem, approach, results, what you'd do with more time.", r:{name:"Make a README guide", src:"makeareadme.com", url:"https://www.makeareadme.com/"}},
+ {t:"Build a simple portfolio index — a GitHub profile README (special repo named exactly as your username) linking all projects with a 1-line description each.", r:{name:"Managing your GitHub profile README", src:"GitHub Docs", url:"https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-profile/customizing-your-profile/managing-your-profile-readme"}},
+ {t:"Record a 2-3 minute video walking through your capstone project (Week 10 or 11). Screen recording with narration is fine — practice explaining your engineering decisions out loud.", r:{name:"OBS Studio screen recording basics", src:"OBS Project", url:"https://obsproject.com/"}},
+ {t:"Write a short 'what I learned' reflection covering the math, the control theory, and the engineering judgment calls you made along the way.", r:{name:"None needed — this is a writing day, use your own notes from the past 11 weeks", src:"—", url:""}},
+ {t:"Identify your 3 weakest areas from the last 12 weeks. Write a focused 1-page plan for what's next: MPC, nonlinear control, Isaac Lab/RL, or SLAM.", r:{name:"Underactuated Robotics (free MIT course, natural next step)", src:"Russ Tedrake, MIT", url:"https://underactuated.csail.mit.edu/"}},
+ {t:"Final review: read through your whole GitHub from a stranger's perspective. Fix anything confusing. You now have proof, not just claims.", r:{name:"None needed — review day", src:"—", url:""}}
  ]}
 ];
 
@@ -355,16 +364,31 @@ function renderWeeks(filter){
     projRow.appendChild(projText);
     body.appendChild(projRow);
 
-    week.days.forEach((taskText, i)=>{
+    week.days.forEach((day, i)=>{
+      const taskText = day.t;
       if(filter && !taskText.toLowerCase().includes(filter.toLowerCase())) return;
-      const row = document.createElement('label');
+      const row = document.createElement('div');
       row.className = 'day-row';
       const cb = document.createElement('input');
       cb.type = 'checkbox';
+      cb.id = 'cb-' + week.w + '-' + i;
       cb.checked = !!state[dayKey(week.w,i)];
-      const label = document.createElement('span');
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'day-content';
+      const label = document.createElement('label');
+      label.htmlFor = cb.id;
       label.className = 'day-label' + (cb.checked ? ' done' : '');
       label.textContent = 'Day ' + (i+1) + ': ' + taskText;
+      contentDiv.appendChild(label);
+      if(day.r && day.r.url){
+        const link = document.createElement('a');
+        link.className = 'day-resource';
+        link.href = day.r.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.innerHTML = '<span>↗</span>' + day.r.name + ' <span class="src">— ' + day.r.src + '</span>';
+        contentDiv.appendChild(link);
+      }
       cb.addEventListener('change', ()=>{
         state[dayKey(week.w,i)] = cb.checked;
         saveState(state);
@@ -374,7 +398,7 @@ function renderWeeks(filter){
         header.querySelector('.count').textContent = dCount + '/' + week.days.length;
       });
       row.appendChild(cb);
-      row.appendChild(label);
+      row.appendChild(contentDiv);
       body.appendChild(row);
     });
 
@@ -419,7 +443,8 @@ document.getElementById('exportBtn').addEventListener('click', ()=>{
   PLAN.forEach(week=>{
     text += 'Week ' + week.w + ' - ' + week.theme + '\n';
     week.days.forEach((d,i)=>{
-      text += '  [' + (state[dayKey(week.w,i)]?'x':' ') + '] Day ' + (i+1) + ': ' + d + '\n';
+      text += '  [' + (state[dayKey(week.w,i)]?'x':' ') + '] Day ' + (i+1) + ': ' + d.t + '\n';
+      if(d.r && d.r.url) text += '      Resource: ' + d.r.name + ' (' + d.r.src + ') — ' + d.r.url + '\n';
     });
     text += '  Project [' + (state[projKey(week.w)]?'x':' ') + ']: ' + week.project.name + '\n\n';
   });
